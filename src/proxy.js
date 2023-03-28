@@ -4,14 +4,12 @@ const express = require('express');
 const fetch = require('node-fetch');
 const {createProxyMiddleware} = require('http-proxy-middleware');
 
-const args = process.argv.slice(2);
 
-if(args.length !== 2) {
-    console.log('Invalid arguments. Usage:')
-    console.log(`report-proxy <username> <password>`);
-    process.exit(1)
-}
-const [username, password] = args;
+let {
+    username,
+    password,
+    port: proxyPort,
+} = parseArgs();
 
 const port = 8085;
 (async () => {
@@ -23,7 +21,7 @@ const port = 8085;
             res.send(`Run your report and change your port to ${port}`);
         })
         .get('/1.0/Report/*', createProxyMiddleware({
-            target: `http://localhost:8080/`,
+            target: `http://localhost:${proxyPort}/`,
             changeOrigin: true,
             logLevel: 'debug',
             cookieDomainRewrite: 'localhost',
@@ -63,4 +61,37 @@ function login(username, password) {
             return v.SessionID;
         }
     })
+}
+
+function parseArgs() {
+    const args = process.argv.slice(2);
+    
+    if(args.length < 2) {
+        console.log('Invalid arguments. Usage:')
+        console.log(`report-proxy <username> <password> [flags]`);
+        console.log(`  where flags:`);
+        console.log(`  -p --port Port of reports instance (default 8080)`);
+        process.exit(1)
+    }
+
+    let params = {
+        port: 8080
+    };
+    let token = ''
+    for(let i=2;i<args.length;i++) {
+        if(token) {
+            if(token === 'port') {
+                params[token] = args[i];
+            }
+            token = undefined;
+        } else if(args[i] === '-p' || args[i] === '--port') {
+            token = 'port'
+        }
+    }
+    
+    return {
+        username: args[0],
+        password: args[1],
+        ...params
+    }
 }
