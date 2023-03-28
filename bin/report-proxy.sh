@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-node ./src/proxy.js $*
+node ./src/proxy.js "$@"
