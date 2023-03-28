@@ -1,6 +1,5 @@
-// import express from "express";
-// import {createProxyMiddleware} from "http-proxy-middleware";
-// import {default as fetch} from "node-fetch";
+#!/usr/bin/env node
+
 const express = require('express');
 const fetch = require('node-fetch');
 const {createProxyMiddleware} = require('http-proxy-middleware');
